@@ -3,9 +3,12 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const _ = require('underscore');
 const app = express();
+const {checkToken, checkRole} = require('../middlewares/auth')
 
-app.get('/users', (req, res)=>{
+app.get('/users', checkToken, (req, res)=>{
     
+
+
     let from = req.query.from || 0;
     let limit = req.query.limit || 5;
 
@@ -31,7 +34,7 @@ app.get('/users', (req, res)=>{
         }); 
 });
 
-app.post('/users', (req, res)=>{
+app.post('/users',[checkToken,checkRole], (req, res)=>{
     let body = req.body;
 
     let user = new User({
@@ -57,7 +60,7 @@ app.post('/users', (req, res)=>{
    
 });
 
-app.put('/users/:id', (req, res)=>{
+app.put('/users/:id',[checkToken,checkRole], (req, res)=>{
     let id = req.params.id;
     let body = _.pick(req.body, ['name','email','img','role','state']);
 
@@ -79,7 +82,7 @@ app.put('/users/:id', (req, res)=>{
  
 });
 
-app.delete('/user/:id', (req, res)=>{
+app.delete('/user/:id',[checkToken,checkRole], (req, res)=>{
     const id = req.params.id;
 
     User.findByIdAndUpdate(id, {state:false},{new:true,runValidators:true}, (err, userUpdated)=>{
